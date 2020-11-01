@@ -1,4 +1,4 @@
-# Legendary Waffle
+# Legendary Waffle :waffle:
 Game off 2020
 ## Why
 We always wanted to make a game, so we decided to participate this year beacuse we have a little more of free time.
