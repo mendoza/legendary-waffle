@@ -1,4 +1,3 @@
 {
-    "Tic80.executablePath": "${cwd}/tic80.exe",
-    "Tic80.executablePathCard": "${cwd}/game.tic"
+    "Tic80Pro.executablePath": "${cwd}/tic80.exe",
 }
