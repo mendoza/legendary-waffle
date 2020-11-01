@@ -35,9 +35,9 @@ function TIC()
     p:moveY()
     cls(12)
     map(0, 0, 30, 17)
-				spr(258, 29*8, 5*8, 15)
+    spr(258, 29 * 8, 5 * 8, 15)
     spr(p.image, p.x, p.y, 15, 1, p.flip)
-			 p.image = 256
+    p.image = 256
 end
 
 function input()
