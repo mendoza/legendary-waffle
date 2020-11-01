@@ -19,7 +19,8 @@ function init()
     }
     solids = {
         [0] = false,
-        [1] = true
+        [1] = true,
+        [2] = true,
     }
 end
 
