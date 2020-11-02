@@ -54,7 +54,7 @@ function TIC()
     cls(12)
     map(0, 0, 30, 17)
     spr(258, 29 * 8, 5 * 8, 15)
-    spr(p.image, p.x, p.y, 15, 1, p.flip)
+    spr(p.image, p.x, p.y, 6, 1, p.flip)
     writeSpeech("The quick brown fox jumps over the lazy dog.")
     p.image = 256
     ticks = ticks + 1
@@ -62,18 +62,20 @@ end
 
 function input()
     if btn(2) then
+								sideMotion()
         p.vx = -1
         p.flip = 1
 
     elseif btn(3) then
-        p.vx = 1
+								sideMotion()
+								p.vx = 1
         p.flip = 0
     else
         p.vx = 0
     end
 
-    if btn(0) then
-        p.image = 257
+    if btn(1) and not btn(2) and not btn(3) then
+        p.image = 272
     end
 
     if isSolid(p.x + p.vx, p.y + p.vy) or isSolid(p.x + 7 + p.vx, p.y + p.vy) or isSolid(p.x + p.vx, p.y + 7 + p.vy) or
@@ -96,16 +98,33 @@ function input()
     end
 end
 
+function sideMotion()
+				t = 1+ticks%60//30
+				if(t==1) then
+								p.image = 257
+				else
+							 p.image = 258
+    end
+end
+
 -- <TILES>
+-- 000:9999999999999999999999999999999999999999999999999999999999999999
 -- 001:6666666666666666363636363333333333333333333333333333333333333333
 -- 002:3333333333333333333333333333333333333333333333333333333333333333
 -- </TILES>
 
 -- <SPRITES>
--- 000:f2666fffff6666faff4040f1ff4444f146666664ff6666f1ff3333ffff2ff2ff
--- 001:ff604ffff66444faf66044f1f66444f142666664ff6666f1ff3333ffff2ff2ff
--- 002:cffcfffcccffcfccfcfcffcfffffffffcff44ffcff4343fff433333f4ccccccc
--- 003:00cccc00000cccc000cc2c20cc1cccc00cc1cc000ccc100000ccc00000000000
+-- 000:66eee6666eeee6666404066664444666622c2666624c2466688886666e66e666
+-- 001:66eee6666eeee6666404066664444666622c2466642c266668888e666e666666
+-- 002:66eee6666eeee6666404066664444666622c2666624c2466e88886666666e666
+-- 016:6666666666eee6666eeee6666404066664444666622c2666624c246668e88e66
+-- 096:ff604ffff66444faf66044f1f66444f142666664ff6666f1ff3333ffff2ff2ff
+-- 236:cffcfffcccffcfccfcfcffcfffffffffcff44ffcff4343fff433333f4ccccccc
+-- 237:00cccc00000cccc000cc2c20cc1cccc00cc1cc000ccc100000ccc00000000000
+-- 238:00000000000000ee00000eee0000eeee0000eee50000ee540000ee5400000554
+-- 239:00000000eeee0000eeeee000eeee000055550000040400004444000044440000
+-- 254:00000112000001120000014200000889000008890000008900000089000000ee
+-- 255:2cc20000ccc20000ccc2400099990000999900000089000000890000e0eee000
 -- </SPRITES>
 
 -- <MAP>
@@ -129,6 +148,6 @@ end
 -- </SFX>
 
 -- <PALETTE>
--- 000:1a1c2c5d275db13e53ef7d57ffcd75a7f07038b76425717929366f3b5dc941a6f673eff7f4f4f494b0c2566c86333c57
+-- 000:1a1c2c8d0cd2d2182cef7d57ffcd75ce915938b76425717929366f3b5dc941a6f673eff7f4f4f494b0c2441c0059280c
 -- </PALETTE>
 
