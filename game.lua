@@ -2,29 +2,6 @@
 -- author: CodeBaker & Leonard1on
 -- desc:   Game Off 2020 Entry
 -- script: lua
-function init()
-    ticks = 0
-    p = {
-        image = 256,
-        x = 96,
-        y = 24,
-        vx = 0,
-        vy = 0,
-        flip = 0,
-        moveY = function(self)
-            self.y = self.y + self.vy;
-        end,
-        moveX = function(self)
-            self.x = self.x + self.vx;
-        end
-    }
-    solidTiles = {
-        [0] = false,
-        [1] = true,
-        [2] = true
-    }
-end
-
 function isSolid(x, y)
     return solidTiles[mget((x) // 8, (y) // 8)]
 end
@@ -46,65 +23,96 @@ function writeSpeech(text)
     end
 end
 
+function init()
+    ticks = 0
+    game = {}
+    p = {
+        image = 256,
+        x = 88,
+        y = 80,
+        vx = 0,
+        vy = 0,
+        flip = 0,
+        moveY = function(self)
+            self.y = self.y + self.vy;
+        end,
+        moveX = function(self)
+            self.x = self.x + self.vx;
+        end,
+        walkingAnimation = function(self)
+            t = 1 + ticks % 60 // 30
+            self.image = 256 + t
+        end,
+        fallingAnimation = function(self)
+            self.image = 259
+        end,
+        isGrounded = function(self)
+            return self.vy == 0
+        end,
+        canMove = function(self)
+            if isSolid(self.x + self.vx, self.y + self.vy) or isSolid(self.x + 7 + self.vx, self.y + self.vy) or
+                isSolid(self.x + self.vx, self.y + 7 + self.vy) or isSolid(self.x + 7 + self.vx, self.y + 7 + self.vy) then
+                self.vx = 0
+            end
+
+            if isSolid(self.x, self.y + 8 + self.vy) or isSolid(self.x + 7, self.y + 8 + self.vy) then
+                self.vy = 0
+            else
+                self.vy = self.vy + 0.2
+            end
+
+            if self.vy < 0 and
+                (isSolid(self.x + self.vx, self.y + self.vy) or isSolid(self.x + 7 + self.vx, self.y + self.vy)) then
+                self.vy = 0
+            end
+            if self:isGrounded() and btnp(4) then
+                self.vy = -2.5
+            end
+        end,
+        update = function(self)
+            if btn(2) then
+                p.vx = -1
+                p.flip = 1
+            elseif btn(3) then
+                p.vx = 1
+                p.flip = 0
+            else
+                p.vx = 0
+            end
+            self:canMove()
+            if btn(1) and not btn(2) and not btn(3) and not btn(4) then
+                p.image = 272
+            end
+            p:moveX()
+            p:moveY()
+        end,
+        render = function(self)
+            if self:isGrounded() and (btn(2) or btn(3)) then
+                self:walkingAnimation()
+            elseif not self:isGrounded() then
+                self:fallingAnimation()
+            end
+            spr(self.image, self.x, self.y, 6, 1, self.flip)
+            self.image = 256
+        end
+    }
+    solidTiles = {
+        [0] = false,
+        [1] = true,
+        [2] = true
+    }
+end
+
 init()
 function TIC()
-    input()
-    p:moveX()
-    p:moveY()
     cls(12)
     map(0, 0, 30, 17)
     spr(258, 29 * 8, 5 * 8, 15)
-    spr(p.image, p.x, p.y, 6, 1, p.flip)
-    writeSpeech("The quick brown fox jumps over the lazy dog.")
-    p.image = 256
+
+    p:update()
+    p:render()
+    -- writeSpeech("The quick brown fox jumps over the lazy dog")
     ticks = ticks + 1
-end
-
-function input()
-    if btn(2) then
-								sideMotion()
-        p.vx = -1
-        p.flip = 1
-
-    elseif btn(3) then
-								sideMotion()
-								p.vx = 1
-        p.flip = 0
-    else
-        p.vx = 0
-    end
-
-    if btn(1) and not btn(2) and not btn(3) then
-        p.image = 272
-    end
-
-    if isSolid(p.x + p.vx, p.y + p.vy) or isSolid(p.x + 7 + p.vx, p.y + p.vy) or isSolid(p.x + p.vx, p.y + 7 + p.vy) or
-        isSolid(p.x + 7 + p.vx, p.y + 7 + p.vy) then
-        p.vx = 0
-    end
-
-    if isSolid(p.x, p.y + 8 + p.vy) or isSolid(p.x + 7, p.y + 8 + p.vy) then
-        p.vy = 0
-    else
-        p.vy = p.vy + 0.2
-    end
-
-    if p.vy == 0 and btnp(4) then
-        p.vy = -2.5
-    end
-
-    if p.vy < 0 and (isSolid(p.x + p.vx, p.y + p.vy) or isSolid(p.x + 7 + p.vx, p.y + p.vy)) then
-        p.vy = 0
-    end
-end
-
-function sideMotion()
-				t = 1+ticks%60//30
-				if(t==1) then
-								p.image = 257
-				else
-							 p.image = 258
-    end
 end
 
 -- <TILES>
@@ -117,6 +125,7 @@ end
 -- 000:66eee6666eeee6666404066664444666622c2666624c2466688886666e66e666
 -- 001:66eee6666eeee6666404066664444666622c2466642c266668888e666e666666
 -- 002:66eee6666eeee6666404066664444666622c2666624c2466e88886666666e666
+-- 003:66eee6666eeee6666444466664040666624c2466622c2666688886666e66e666
 -- 016:6666666666eee6666eeee6666404066664444666622c2666624c246668e88e66
 -- 096:ff604ffff66444faf66044f1f66444f142666664ff6666f1ff3333ffff2ff2ff
 -- 236:cffcfffcccffcfccfcfcffcfffffffffcff44ffcff4343fff433333f4ccccccc
