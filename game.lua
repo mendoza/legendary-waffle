@@ -17,15 +17,29 @@ function init()
             self.x = self.x + self.vx;
         end
     }
-    solids = {
+    solidTiles = {
         [0] = false,
         [1] = true,
         [2] = true
     }
 end
 
-function solid(x, y)
-    return solids[mget((x) // 8, (y) // 8)]
+function isSolid(x, y)
+    return solidTiles[mget((x) // 8, (y) // 8)]
+end
+
+function writeSpeech(text)
+
+    final = ''
+    for i = 1, #text do
+        final = final .. string.sub(text, i, i)
+        if i % 38 == 0 then
+            final = final .. '\n'
+        end
+    end
+    rect(0, (136 * 0.75) // 1, 240, 136 * 0.25, 8)
+    rectb(0, (136 * 0.75) // 1, 240, 136 * 0.25, 4)
+    print(final, 5, (136 * 0.75) + 5 // 1, 12, true)
 end
 
 init()
@@ -37,6 +51,7 @@ function TIC()
     map(0, 0, 30, 17)
     spr(258, 29 * 8, 5 * 8, 15)
     spr(p.image, p.x, p.y, 15, 1, p.flip)
+    writeSpeech("The quick brown fox jumps over the lazy dog")
     p.image = 256
 end
 
@@ -56,12 +71,12 @@ function input()
         p.image = 257
     end
 
-    if solid(p.x + p.vx, p.y + p.vy) or solid(p.x + 7 + p.vx, p.y + p.vy) or solid(p.x + p.vx, p.y + 7 + p.vy) or
-        solid(p.x + 7 + p.vx, p.y + 7 + p.vy) then
+    if isSolid(p.x + p.vx, p.y + p.vy) or isSolid(p.x + 7 + p.vx, p.y + p.vy) or isSolid(p.x + p.vx, p.y + 7 + p.vy) or
+        isSolid(p.x + 7 + p.vx, p.y + 7 + p.vy) then
         p.vx = 0
     end
 
-    if solid(p.x, p.y + 8 + p.vy) or solid(p.x + 7, p.y + 8 + p.vy) then
+    if isSolid(p.x, p.y + 8 + p.vy) or isSolid(p.x + 7, p.y + 8 + p.vy) then
         p.vy = 0
     else
         p.vy = p.vy + 0.2
@@ -71,7 +86,7 @@ function input()
         p.vy = -2.5
     end
 
-    if p.vy < 0 and (solid(p.x + p.vx, p.y + p.vy) or solid(p.x + 7 + p.vx, p.y + p.vy)) then
+    if p.vy < 0 and (isSolid(p.x + p.vx, p.y + p.vy) or isSolid(p.x + 7 + p.vx, p.y + p.vy)) then
         p.vy = 0
     end
 end
