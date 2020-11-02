@@ -49,7 +49,7 @@ function init()
         isGrounded = function(self)
             return self.vy == 0
         end,
-        canMove = function(self)
+        testMovement = function(self)
             if isSolid(self.x + self.vx, self.y + self.vy) or isSolid(self.x + 7 + self.vx, self.y + self.vy) or
                 isSolid(self.x + self.vx, self.y + 7 + self.vy) or isSolid(self.x + 7 + self.vx, self.y + 7 + self.vy) then
                 self.vx = 0
@@ -79,7 +79,7 @@ function init()
             else
                 p.vx = 0
             end
-            self:canMove()
+            self:testMovement()
             if btn(1) and not btn(2) and not btn(3) and not btn(4) then
                 p.image = 272
             end
