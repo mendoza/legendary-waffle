@@ -3,6 +3,7 @@
 -- desc:   Game Off 2020 Entry
 -- script: lua
 function init()
+    ticks = 0
     p = {
         image = 256,
         x = 96,
@@ -29,7 +30,6 @@ function isSolid(x, y)
 end
 
 function writeSpeech(text)
-
     final = ''
     for i = 1, #text do
         final = final .. string.sub(text, i, i)
@@ -40,6 +40,10 @@ function writeSpeech(text)
     rect(0, (136 * 0.75) // 1, 240, 136 * 0.25, 8)
     rectb(0, (136 * 0.75) // 1, 240, 136 * 0.25, 4)
     print(final, 5, (136 * 0.75) + 5 // 1, 12, true)
+    seconds = (ticks // 60)
+    if seconds % 2 == 0 then
+        tri(235, 129, 229, 129, 232, 132, 12)
+    end
 end
 
 init()
@@ -51,8 +55,9 @@ function TIC()
     map(0, 0, 30, 17)
     spr(258, 29 * 8, 5 * 8, 15)
     spr(p.image, p.x, p.y, 15, 1, p.flip)
-    writeSpeech("The quick brown fox jumps over the lazy dog")
+    writeSpeech("The quick brown fox jumps over the lazy dog.")
     p.image = 256
+    ticks = ticks + 1
 end
 
 function input()
