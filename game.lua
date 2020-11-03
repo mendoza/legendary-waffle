@@ -100,11 +100,11 @@ function init()
         [0] = false,
         [1] = true,
         [2] = true,
-								[3] = true,
-								[4] = true,
-								[19] = true,
-								[20] = true,
-								
+        [3] = true,
+        [4] = true,
+        [19] = true,
+        [20] = true
+
     }
 end
 
