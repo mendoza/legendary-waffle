@@ -23,10 +23,52 @@ function writeSpeech(text)
     end
 end
 
+function addProjectile(x, y, flip)
+    local vx = 0
+    if flip == 0 then
+        vx = 2
+    else
+        vx = -2
+    end
+    table.insert(projectiles, {
+        x = x,
+        y = y,
+        vx = vx,
+        flip = flip,
+        step = 0,
+        shouldDelete = false,
+        image = 260,
+        update = function(self)
+            if isSolid(self.x + vx, self.y) or isSolid(self.x + 7 + self.vx, self.y) then
+                local t = self.step % 30 // 15
+
+                self.image = 262 + t
+                if (self.step / 60) > 0.40 then
+                    self.shouldDelete = true
+                end
+            else
+                self.x = self.x + self.vx
+                if (self.step / 60) > 0.25 then
+                    self.shouldDelete = true
+                end
+                local t = self.step % 30 // 15
+                self.image = 260 + t
+            end
+            self.step = self.step + 1
+
+        end,
+        render = function(self)
+            spr(self.image, self.x, self.y, 6, 1, self.flip)
+        end
+    })
+end
+
 function init()
     ticks = 0
     game = {}
+    projectiles = {}
     p = {
+        health = 3.5,
         image = 256,
         x = 88,
         y = 72,
@@ -40,11 +82,14 @@ function init()
             self.x = self.x + self.vx;
         end,
         walkingAnimation = function(self)
-            t = 1 + ticks % 30 // 15
+            local t = 1 + ticks % 30 // 15
             self.image = 256 + t
         end,
         fallingAnimation = function(self)
             self.image = 259
+        end,
+        shootAnimation = function(self)
+            self.image = 273
         end,
         isGrounded = function(self)
             return self.vy == 0
@@ -79,12 +124,37 @@ function init()
             else
                 p.vx = 0
             end
+            if btnp(5) then
+                addProjectile(p.x + 2, p.y, p.flip)
+            end
             self:testMovement()
             if btn(1) and not btn(2) and not btn(3) and not btn(4) then
                 p.image = 272
             end
+            if btn(5) then
+                p:shootAnimation()
+            end
             p:moveX()
             p:moveY()
+        end,
+        hud = function(self)
+            local total = self.health
+            local x = 0
+            local y = 0
+            for i = 1, 5 do
+                if total - 1 < 0 then
+                    if total - 0.5 < 0 then
+                        spr(306, x * 8, y, 6)
+                    else
+                        spr(305, x * 8, y, 6)
+                        total = total - 0.5
+                    end
+                else
+                    spr(304, x * 8, y, 6)
+                    total = total - 1
+                end
+                x = x + 1
+            end
         end,
         render = function(self)
             if self:isGrounded() and (btn(2) or btn(3)) then
@@ -113,10 +183,18 @@ function TIC()
     cls(12)
     map(0, 0, 30, 17)
     spr(492, 29 * 8, 5 * 8, 15)
-
     p:update()
+    for k, v in ipairs(projectiles) do
+        v:update()
+        if v.shouldDelete then
+            table.remove(projectiles, k)
+        else
+            v:render()
+        end
+    end
     p:render()
-    -- writeSpeech("The quick brown fox jumps over the lazy dog")
+    p:hud()
+    writeSpeech(string.format("balas: %s, isGrounded: %s", #projectiles, p:isGrounded()))
     ticks = ticks + 1
 end
 
@@ -156,7 +234,12 @@ end
 -- 001:66eee6666e4446666404066664444666622c2466642c266668888e666e666666
 -- 002:66eee6666e4446666404066664444666622c2666624c2466e88886666666e666
 -- 003:66eee6666e4446666444466664040666624c2466622c2666e8888e6666666666
+-- 004:66666666666666666c6c6ccc66666cacc6c66ccc666666666666666666666666
+-- 005:6666666666666666c6c66ccc66666cac6c6c6ccc666666666666666666666666
+-- 006:66666666666cc666666cc6666cccccc66cccccc6666cc666666cc66666666666
+-- 007:66666666666cc666666666666c6666c66c6666c666666666666cc66666666666
 -- 016:6666666666eee6666e4446666404066664444666622c2666624c246668e88e66
+-- 017:66eee6666e4446666404066664444666622c4666622c2466688886666e66e666
 -- 018:666eee6666e4446666404066664a4466622c2666624c466668888e6666e66666
 -- 032:66efff666eff4f66ef404066ef544466e6111146661411666111111666266266
 -- 033:66efff666eff4f66ef404066ef544466e6141166661111466111111666266266
@@ -164,6 +247,9 @@ end
 -- 035:6d3336666d03066663333636689c98666883ee6669999ee6688886ee66f6f66e
 -- 036:64146666444146d64ffffd2d4f0f04d64ffff6d664f44fd6644446d6680880d6
 -- 037:66666666441446d644414d2d4ffff4d64f0f06d6644446d664f44fd6680880d6
+-- 048:6666666662666266222622262222222622222226622222666622266666626666
+-- 049:6666666662666066222600062220000622200006622200666622066666626666
+-- 050:6666666660666066000600060000000600000006600000666600066666606666
 -- 096:ff604ffff66444faf66044f1f66444f142666664ff6666f1ff3333ffff2ff2ff
 -- 236:cffcfffcccffcfccfcfcffcfffffffffcff33ffcff3434fff344444f3ccccccc
 -- 237:00cccc00000cccc000cc2c20cc1cccc00cc1cc000ccc100000ccc00000000000
