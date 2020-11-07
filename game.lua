@@ -55,7 +55,55 @@ function addProjectile(x, y, flip)
                 self.image = 260 + t
             end
             self.step = self.step + 1
+        end,
+        render = function(self)
+            spr(self.image, self.x, self.y, 6, 1, self.flip)
+        end
+    })
+end
 
+function addEnemy(x, y, flip)
+    table.insert(enemies, {
+        health = 3,
+        image = 335,
+        x = x,
+        y = y,
+        vx = 0.5,
+        vy = 0,
+        flip = flip,
+        moveX = function(self)
+            self.x = self.x + self.vx;
+        end,
+        walkingAnimation = function(self)
+            local t = 1 + ticks % 30 // 15
+            self.image = 335 + t
+        end,
+        testMovement = function(self)
+            if isSolid(self.x + self.vx, self.y + self.vy) or isSolid(self.x + 7 + self.vx, self.y + self.vy) or
+                isSolid(self.x + self.vx, self.y + 7 + self.vy) or isSolid(self.x + 7 + self.vx, self.y + 7 + self.vy) then
+                self.vx = self.vx * -1
+                self.flip = (self.flip + 1) % 2
+            end
+
+            if isSolid(self.x, self.y + 8 + self.vy) or isSolid(self.x + 7, self.y + 8 + self.vy) then
+                self.vy = 0
+            else
+                self.vy = self.vy + 0.2
+            end
+
+            if self.vy < 0 and
+                (isSolid(self.x + self.vx, self.y + self.vy) or isSolid(self.x + 7 + self.vx, self.y + self.vy)) then
+                self.vy = 0
+            end
+
+            if (p.x == self.x + self.vx and p.y == self.y) or (p.x == self.x + 8 + self.vx and p.y == self.y) then
+                p:hurt()
+            end
+        end,
+        update = function(self)
+            self:testMovement()
+            self:moveX()
+            self:walkingAnimation()
         end,
         render = function(self)
             spr(self.image, self.x, self.y, 6, 1, self.flip)
@@ -67,6 +115,7 @@ function init()
     ticks = 0
     game = {}
     projectiles = {}
+    enemies = {}
     p = {
         health = 3.5,
         magic = 12,
@@ -121,6 +170,11 @@ function init()
                 self.vy = -2.5
             end
         end,
+        hurt = function(self)
+            if (self.health ~= 0) then
+                self.health = self.health - 0.5
+            end
+        end,
         update = function(self)
             if btn(2) then
                 p.vx = -1
@@ -165,21 +219,20 @@ function init()
                 xh = xh + 1
             end
             local totalMagic = self.magic
-            local xm = 0
-            local ym = 8
-            for i = 1, 5 do
+            local xm = 200
+            local ym = 0
+            for i = 0, 4 do
                 if totalMagic - 5 < 0 then
                     if totalMagic > 0 then
-                        spr(321, xm * 8, ym, 6)
+                        spr(321, xm + i * 8, ym, 6)
                         totalMagic = totalMagic - totalMagic % 5
                     else
-                        spr(322, xm * 8, ym, 6)
+                        spr(322, xm + i * 8, ym, 6)
                     end
                 else
-                    spr(320, xm * 8, ym, 6)
+                    spr(320, xm + i * 8, ym, 6)
                     totalMagic = totalMagic - 5
                 end
-                xm = xm + 1
             end
         end,
         render = function(self)
@@ -200,11 +253,12 @@ function init()
         [4] = true,
         [19] = true,
         [20] = true
-
     }
 end
 
 init()
+addEnemy(184, 72, 0)
+
 function TIC()
     cls(12)
     map(0, 0, 30, 17)
@@ -218,9 +272,18 @@ function TIC()
             v:render()
         end
     end
+    for k, v in ipairs(enemies) do
+        v:update()
+        if v.health == 0 then
+            table.remove(enemies, k)
+        else
+            v:render()
+        end
+    end
     p:render()
     p:hud()
-    writeSpeech(string.format("balas: %s, isGrounded: %s, magia: %s", #projectiles, p:isGrounded(), p.magic))
+    writeSpeech(string.format("balas: %s, isGrounded: %s, magia: %s, health: %s", #projectiles, p:isGrounded(), p.magic,
+                    p.health))
     ticks = ticks + 1
 end
 
@@ -312,6 +375,8 @@ end
 -- 064:666166666671766666787666667876666788876678c888767c88887667777766
 -- 065:666166666671766666707666667076666700076678c888767c88887667777766
 -- 066:666166666671766666707666667076666700076670c000767c00007667777766
+-- 080:6666666666666666662112666632236666111166661221666ff66e6666666ee6
+-- 081:66666666666666666621126666322366661111666612216666e66ff66ee66666
 -- 096:ff604ffff66444faf66044f1f66444f142666664ff6666f1ff3333ffff2ff2ff
 -- 236:cffcfffcccffcfccfcfcffcfffffffffcff33ffcff3434fff344444f3ccccccc
 -- 237:00cccc00000cccc000cc2c20cc1cccc00cc1cc000ccc100000ccc00000000000
