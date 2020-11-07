@@ -177,28 +177,28 @@ function init()
         end,
         update = function(self)
             if btn(2) then
-                p.vx = -1
-                p.flip = 1
+                self.vx = -1
+                self.flip = 1
             elseif btn(3) then
-                p.vx = 1
-                p.flip = 0
+                self.vx = 1
+                self.flip = 0
             else
-                p.vx = 0
+                self.vx = 0
             end
             if btnp(5) and self.magic > 0 then
-                addProjectile(p.x + 2, p.y, p.flip)
+                addProjectile(self.x + 2, self.y, self.flip)
                 self.magic = self.magic - 1
             end
             self:testMovement()
             if btn(1) and not btn(2) and not btn(3) and not btn(4) then
-                p.image = 272
+                self.image = 272
             end
             if btn(5) then
-                p:shootAnimation()
+                self:shootAnimation()
             end
-            p:moveX()
-            p:moveY()
-            p:refillMagic()
+            self:moveX()
+            self:moveY()
+            self:refillMagic()
         end,
         hud = function(self)
             local total = self.health
