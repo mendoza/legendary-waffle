@@ -120,6 +120,8 @@ function init()
         health = 3.5,
         magic = 12,
         image = 256,
+        hurted = false,
+        lastHurted = 0,
         x = 88,
         y = 72,
         vx = 0,
@@ -172,32 +174,44 @@ function init()
         end,
         hurt = function(self)
             if (self.health ~= 0) then
+                self.hurted = true
+                self.lastHurted = ticks
                 self.health = self.health - 0.5
             end
         end,
         update = function(self)
-            if btn(2) then
-                self.vx = -1
-                self.flip = 1
-            elseif btn(3) then
-                self.vx = 1
-                self.flip = 0
+            if self.hurted and (ticks - self.lastHurted) / 60 < 0.5 then
+                self.image = 275
             else
-                self.vx = 0
+                self.hurted = false
+                if self:isGrounded() and (btn(2) or btn(3)) then
+                    self:walkingAnimation()
+                elseif not self:isGrounded() then
+                    self:fallingAnimation()
+                end
+                if btn(2) then
+                    self.vx = -1
+                    self.flip = 1
+                elseif btn(3) then
+                    self.vx = 1
+                    self.flip = 0
+                else
+                    self.vx = 0
+                end
+                if btnp(5) and self.magic > 0 then
+                    addProjectile(self.x + 2, self.y, self.flip)
+                    self.magic = self.magic - 1
+                end
+                self:testMovement()
+                if btn(1) and not btn(2) and not btn(3) and not btn(4) then
+                    self.image = 272
+                end
+                if btn(5) then
+                    self:shootAnimation()
+                end
+                self:moveX()
+                self:moveY()
             end
-            if btnp(5) and self.magic > 0 then
-                addProjectile(self.x + 2, self.y, self.flip)
-                self.magic = self.magic - 1
-            end
-            self:testMovement()
-            if btn(1) and not btn(2) and not btn(3) and not btn(4) then
-                self.image = 272
-            end
-            if btn(5) then
-                self:shootAnimation()
-            end
-            self:moveX()
-            self:moveY()
             self:refillMagic()
         end,
         hud = function(self)
@@ -236,11 +250,7 @@ function init()
             end
         end,
         render = function(self)
-            if self:isGrounded() and (btn(2) or btn(3)) then
-                self:walkingAnimation()
-            elseif not self:isGrounded() then
-                self:fallingAnimation()
-            end
+
             spr(self.image, self.x, self.y, 6, 1, self.flip)
             self.image = 256
         end
