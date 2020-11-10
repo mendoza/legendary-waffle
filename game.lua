@@ -6,6 +6,36 @@ function isSolid(x, y)
     return solidTiles[mget((x) // 8, (y) // 8)]
 end
 
+function renderEnemies()
+    for k, v in ipairs(enemies) do
+        v:update()
+        for pk, pv in ipairs(projectiles) do
+            if pv.x // 8 == v.x // 8 and pv.y // 8 == v.y // 8 then
+                if not pv.hittedEnemy then
+                    v.health = v.health - 1
+                end
+                pv.hittedEnemy = true
+            end
+        end
+        if v.health == 0 then
+            table.remove(enemies, k)
+        else
+            v:render()
+        end
+    end
+end
+
+function renderProjectiles()
+    for k, v in ipairs(projectiles) do
+        v:update()
+        if v.shouldDelete then
+            table.remove(projectiles, k)
+        else
+            v:render()
+        end
+    end
+end
+
 function writeSpeech(text)
     local final = ''
     for i = 1, #text do
@@ -37,12 +67,15 @@ function addProjectile(x, y, flip)
         flip = flip,
         step = 0,
         shouldDelete = false,
+        hittedEnemy = false,
         image = 260,
+        explosionAnimation = function(self)
+            local t = self.step % 30 // 15
+            self.image = 262 + t
+        end,
         update = function(self)
-            if isSolid(self.x + vx, self.y) or isSolid(self.x + 7 + self.vx, self.y) then
-                local t = self.step % 30 // 15
-
-                self.image = 262 + t
+            if isSolid(self.x + vx, self.y) or isSolid(self.x + 7 + self.vx, self.y) or self.hittedEnemy then
+                self:explosionAnimation()
                 if (self.step / 60) > 0.40 then
                     self.shouldDelete = true
                 end
@@ -263,7 +296,6 @@ function init()
             end
         end,
         render = function(self)
-
             spr(self.image, self.x, self.y, 6, 1, self.flip)
             self.image = 256
         end
@@ -287,22 +319,10 @@ function TIC()
     map(0, 0, 30, 17)
     spr(492, 29 * 8, 5 * 8, 15)
     p:update()
-    for k, v in ipairs(projectiles) do
-        v:update()
-        if v.shouldDelete then
-            table.remove(projectiles, k)
-        else
-            v:render()
-        end
-    end
-    for k, v in ipairs(enemies) do
-        v:update()
-        if v.health == 0 then
-            table.remove(enemies, k)
-        else
-            v:render()
-        end
-    end
+
+    renderEnemies()
+    renderProjectiles()
+
     p:render()
     p:hud()
     writeSpeech(string.format("balas: %s, isGrounded: %s, magia: %s, health: %s, hurted: %s, X: %s, Y: %s",
