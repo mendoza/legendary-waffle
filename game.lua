@@ -7,7 +7,7 @@ function isSolid(x, y)
 end
 
 function writeSpeech(text)
-    final = ''
+    local final = ''
     for i = 1, #text do
         final = final .. string.sub(text, i, i)
         if i % 38 == 0 then
@@ -17,7 +17,7 @@ function writeSpeech(text)
     rect(0, (136 * 0.75) // 1, 240, 136 * 0.25, 8)
     rectb(0, (136 * 0.75) // 1, 240, 136 * 0.25, 4)
     print(final, 5, (136 * 0.75) + 5 // 1, 12, true)
-    seconds = (ticks // 60)
+    local seconds = (ticks // 60)
     if seconds % 2 == 0 then
         tri(235, 129, 229, 129, 232, 132, 12)
     end
@@ -96,7 +96,7 @@ function addEnemy(x, y, flip)
                 self.vy = 0
             end
 
-            if (p.x <= self.x + 4 and p.x >= self.x - 4) and (p.y <= self.y + 0.2 and p.y >= self.y -0.2 ) then
+            if (p.x <= self.x + 4 and p.x >= self.x - 4) and (p.y <= self.y + 0.2 and p.y >= self.y - 0.2) then
                 p:hurt()
             end
         end,
@@ -123,6 +123,7 @@ function init()
         hurted = false,
         dead = false,
         lastHurted = 0,
+        knockBackVx = 0,
         x = 88,
         y = 72,
         vx = 0,
@@ -178,11 +179,21 @@ function init()
                 self.hurted = true
                 self.lastHurted = ticks
                 self.health = self.health - 0.5
+                self.knockBackVx = 1
+                if self.flip == 0 then
+                    self.knockBackVx = self.knockBackVx * -1
+                end
             end
         end,
         update = function(self)
-            if self.hurted and (ticks - self.lastHurted) / 60 < 0.5 then
-                self.image = 275                
+            if self.hurted and (ticks - self.lastHurted) <= 30 then
+                self.image = 275
+                if (ticks - self.lastHurted) < 15 then
+                    self.vy = -1
+                    self.vx = self.knockBackVx
+                else
+                    self.vy = 1
+                end
             else
                 self.hurted = false
                 if self:isGrounded() and (btn(2) or btn(3)) then
@@ -203,16 +214,16 @@ function init()
                     addProjectile(self.x + 2, self.y, self.flip)
                     self.magic = self.magic - 1
                 end
-                self:testMovement()
                 if btn(1) and not btn(2) and not btn(3) and not btn(4) then
                     self.image = 272
                 end
                 if btn(5) then
                     self:shootAnimation()
                 end
-                self:moveX()
-                self:moveY()
             end
+            self:testMovement()
+            self:moveX()
+            self:moveY()
             self:refillMagic()
         end,
         hud = function(self)
@@ -233,6 +244,7 @@ function init()
                 end
                 xh = xh + 1
             end
+            -- Codigo por Velasquez UwU
             local totalMagic = self.magic
             local xm = 200
             local ym = 0
@@ -293,8 +305,8 @@ function TIC()
     end
     p:render()
     p:hud()
-    writeSpeech(string.format("balas: %s, isGrounded: %s, magia: %s, health: %s, hurted: %s, X: %s, Y: %s" , #projectiles, p:isGrounded(), p.magic,
-                    p.health, p.hurted, p.x, p.y))
+    writeSpeech(string.format("balas: %s, isGrounded: %s, magia: %s, health: %s, hurted: %s, X: %s, Y: %s",
+                    #projectiles, p:isGrounded(), p.magic, p.health, p.hurted, p.x, p.y))
     ticks = ticks + 1
 end
 
@@ -366,7 +378,7 @@ end
 -- 000:66eee6666e444666640406666444466667737666674774666ffff6666e66e666
 -- 001:66eee6666e444666640406666444466667737466647776666ffffe666e666666
 -- 002:66eee6666e44466664040666644446666773766667477466effff6666666e666
--- 003:66eee6666e44466664444666640406666743746667777666effffe6666666666
+-- 003:66eee6666e44466664040666444444666773766667777666effffe6666666666
 -- 004:6666666666666666666662226362233266662232264662226666666666666666
 -- 005:6666666666666666264662226666223263622332666662226666666666666666
 -- 006:6666666666662266666233266623443266234432666233266666226666666666
@@ -391,10 +403,6 @@ end
 -- 096:ff604ffff66444faf66044f1f66444f142666664ff6666f1ff3333ffff2ff2ff
 -- 236:cffcfffcccffcfccfcfcffcfffffffffcff33ffcff3434fff344444f3ccccccc
 -- 237:00cccc00000cccc000cc2c20cc1cccc00cc1cc000ccc100000ccc00000000000
--- 238:00000000000000ee00000eee0000eeee0000eee50000ee540000ee5400000554
--- 239:00000000eeee0000eeeee000eeee000055550000040400004444000044440000
--- 254:00000112000001120000014200000889000008890000008900000089000000ee
--- 255:2cc20000ccc20000ccc2400099990000999900000089000000890000e0eee000
 -- </SPRITES>
 
 -- <MAP>
