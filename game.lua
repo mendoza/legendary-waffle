@@ -96,7 +96,7 @@ function addEnemy(x, y, flip)
                 self.vy = 0
             end
 
-            if (p.x == self.x + self.vx and p.y == self.y) or (p.x == self.x + 8 + self.vx and p.y == self.y) then
+            if (p.x <= self.x + 4 and p.x >= self.x - 4) and (p.y <= self.y + 0.2 and p.y >= self.y -0.2 ) then
                 p:hurt()
             end
         end,
@@ -121,6 +121,7 @@ function init()
         magic = 12,
         image = 256,
         hurted = false,
+        dead = false,
         lastHurted = 0,
         x = 88,
         y = 72,
@@ -173,7 +174,7 @@ function init()
             end
         end,
         hurt = function(self)
-            if (self.health ~= 0) then
+            if self.health ~= 0 and not self.hurted then
                 self.hurted = true
                 self.lastHurted = ticks
                 self.health = self.health - 0.5
@@ -181,7 +182,7 @@ function init()
         end,
         update = function(self)
             if self.hurted and (ticks - self.lastHurted) / 60 < 0.5 then
-                self.image = 275
+                self.image = 275                
             else
                 self.hurted = false
                 if self:isGrounded() and (btn(2) or btn(3)) then
@@ -292,8 +293,8 @@ function TIC()
     end
     p:render()
     p:hud()
-    writeSpeech(string.format("balas: %s, isGrounded: %s, magia: %s, health: %s", #projectiles, p:isGrounded(), p.magic,
-                    p.health))
+    writeSpeech(string.format("balas: %s, isGrounded: %s, magia: %s, health: %s, hurted: %s, X: %s, Y: %s" , #projectiles, p:isGrounded(), p.magic,
+                    p.health, p.hurted, p.x, p.y))
     ticks = ticks + 1
 end
 
@@ -385,8 +386,8 @@ end
 -- 064:666166666671766666787666667876666788876678c888767c88887667777766
 -- 065:666166666671766666707666667076666700076678c888767c88887667777766
 -- 066:666166666671766666707666667076666700076670c000767c00007667777766
--- 080:6666666666666666662112666632236666111166661221666ff66e6666666ee6
--- 081:66666666666666666621126666322366661111666612216666e66ff66ee66666
+-- 080:6666666661111116612112162132231262111126211221126ff66e6666666ee6
+-- 081:66666666611111166121121621322312621111262112211266e66ff66ee66666
 -- 096:ff604ffff66444faf66044f1f66444f142666664ff6666f1ff3333ffff2ff2ff
 -- 236:cffcfffcccffcfccfcfcffcfffffffffcff33ffcff3434fff344444f3ccccccc
 -- 237:00cccc00000cccc000cc2c20cc1cccc00cc1cc000ccc100000ccc00000000000
