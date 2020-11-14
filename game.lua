@@ -151,8 +151,6 @@ function init()
         map = {
             x = 0,
             y = 0,
-            w = 30,
-            h = 17
         },
         nextLevel = function(self)
             self.currentLevel = self.currentLevel + 1
