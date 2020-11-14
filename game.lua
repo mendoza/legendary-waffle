@@ -3,7 +3,7 @@
 -- desc:   Game Off 2020 Entry
 -- script: lua
 function isSolid(x, y)
-    return solidTiles[mget((x + game.map.x) // 8, (y) // 8)]
+    return solidTiles[mget((x + game.map.x) // 8, (y + game.map.y) // 8)]
 end
 
 function renderEnemies()
@@ -150,13 +150,12 @@ function init()
         currentLevel = 0,
         map = {
             x = 0,
-            y = 0,
+            y = 0
         },
         nextLevel = function(self)
             self.currentLevel = self.currentLevel + 1
             self.map.x = self.map.x + 30 * self.currentLevel
-            -- self.map.w = 30 * (self.currentLevel + 1)
-            -- self.map.h = 30 * currentLevel
+            self.map.y = self.map.y + 17 * self.currentLevel
         end
     }
     projectiles = {}
