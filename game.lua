@@ -3,7 +3,7 @@
 -- desc:   Game Off 2020 Entry
 -- script: lua
 function isSolid(x, y)
-    return solidTiles[mget((x) // 8, (y) // 8)]
+    return solidTiles[mget((x + game.map.x) // 8, (y) // 8)]
 end
 
 function renderEnemies()
@@ -146,7 +146,21 @@ end
 
 function init()
     ticks = 0
-    game = {}
+    game = {
+        currentLevel = 0,
+        map = {
+            x = 0,
+            y = 0,
+            w = 30,
+            h = 17
+        },
+        nextLevel = function(self)
+            self.currentLevel = self.currentLevel + 1
+            self.map.x = self.map.x + 30 * self.currentLevel
+            -- self.map.w = 30 * (self.currentLevel + 1)
+            -- self.map.h = 30 * currentLevel
+        end
+    }
     projectiles = {}
     enemies = {}
     p = {
@@ -252,6 +266,7 @@ function init()
                 end
                 if btn(5) then
                     self:shootAnimation()
+                    game:nextLevel()
                 end
             end
             self:testMovement()
@@ -316,7 +331,7 @@ addEnemy(184, 72, 0)
 
 function TIC()
     cls(12)
-    map(0, 0, 30, 17)
+    map(game.map.x, game.map.y)
     spr(492, 29 * 8, 5 * 8, 15)
     p:update()
 
